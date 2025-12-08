@@ -1,0 +1,106 @@
+.login-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+.login-card {
+  width: 360px;
+  padding: 26px 26px 20px;
+  border-radius: 18px;
+  background: radial-gradient(circle at top left, #1f2937, #020617 60%);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  background: radial-gradient(circle at 15% 0, #38bdf8, #4f46e5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.login-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.login-header p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-form label {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login-form input,
+.login-form select {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  padding: 8px 10px;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.login-form input:focus,
+.login-form select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.6);
+}
+
+.login-form button {
+  margin-top: 6px;
+  border-radius: 999px;
+  border: none;
+  padding: 9px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  background: linear-gradient(135deg, #4f46e5, #22c55e);
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(22, 163, 74, 0.6);
+}
+
+.login-error {
+  color: #f97373;
+  font-size: 0.8rem;
+}
+
+.login-footer {
+  margin-top: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  padding-top: 10px;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
