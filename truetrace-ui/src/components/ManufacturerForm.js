@@ -49,8 +49,41 @@ export default function ManufacturerForm() {
   return (
     <div className="app-root">
       <header className="app-header">
-        <div className="logo-mark">TT</div>
+        <a
+          href="/"
+          style={{
+            marginRight: "16px",
+            fontSize: "0.85rem",
+            color: "#9ca3af",
+            textDecoration: "none"
+          }}
+        >
+          Logout
+        </a>
+        <img
+            src={require("../assets/logo.png")}
+            alt="TrueTrace logo"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 14,
+              objectFit: "cover",
+              marginRight: 12
+            }}
+          />       
         <div className="header-text">
+          <a
+            href="/verify"
+            style={{
+              marginLeft: "auto",
+              fontSize: "0.85rem",
+              color: "#a5b4fc",
+              textDecoration: "none"
+            }}
+          >
+            Verify QR
+          </a>
+
           <h1>TrueTrace – Manufacturer Console</h1>
           <p className="subtitle">
             Register product origins and generate QR codes backed by blockchain.

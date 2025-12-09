@@ -29,8 +29,8 @@ contract ProductRegistry {
         string memory _manufacturer,
         string memory _qrHash
     ) public {
-        require(products[_id].timestamp == 0, "Product ID already used");
-        require(!qrExists[_qrHash], "QR already registered");
+        //require(products[_id].timestamp == 0, "Product ID already used");
+        //require(!qrExists[_qrHash], "QR already registered");
 
         products[_id] = Product({
             id: _id,

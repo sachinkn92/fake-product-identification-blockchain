@@ -5,47 +5,49 @@ const abi = require("../blockchain/abi.json");
 const { contractAddress, rpcUrl } = require("../blockchain/config");
 const CryptoJS = require("crypto-js");
 
+// In-memory store for manufacturer data
+const manufacturerStore = {};
+
 const app = express();
 const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
 
-// connect to Ganache
+// Connect to Ganache
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-// use the same private key you put in hardhat.config.js
-const signer = new ethers.Wallet("0x89eb7604fea51064c7a13da5dde5b09c537a60667c7c3678359e8d08592c5c0a", provider);
+// WARNING: do not push real key to GitHub
+const signer = new ethers.Wallet(
+  "0x325d56647f038d54abc2ea1bf6cca21b5504bd4a07b4019f0f595ea4d2413273",
+  provider
+);
 
 const contract = new ethers.Contract(contractAddress, abi, signer);
 
-// simple health check
+// Health check
 app.get("/", (req, res) => {
   res.json({ message: "Fake Product Identification API is running" });
 });
 
-// register product
+// Simple /products route (optional)
 app.post("/products", async (req, res) => {
   try {
     const { id, name, manufacturer } = req.body;
 
-    // 1) Build a simple string from product data
     const rawData = `${id}|${name}|${manufacturer}`;
-
-    // 2) Create SHA-256 hash for QR
     const qrHash = CryptoJS.SHA256(rawData).toString();
 
-    // 3) Call smart contract with generated hash
     const tx = await contract.registerProduct(
-      id,
+      Number(id),
       name,
       manufacturer,
-      qrHash
+      qrHash,
+      { gasLimit: 3_000_000 }
     );
 
     await tx.wait();
 
-    // 4) Return info to client (will be used to build QR code later)
     res.json({
       success: true,
       txHash: tx.hash,
@@ -54,47 +56,55 @@ app.post("/products", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ success: false, error: err.reason || err.message });
+    res
+      .status(400)
+      .json({ success: false, error: err.reason || err.message });
   }
 });
 
+// Manufacturer route
 app.post("/mfg/products", async (req, res) => {
   try {
     const { companyName, address, productID, productName, brand } = req.body;
 
     const timestamp = new Date().toISOString();
 
-    // Human‑readable text that will go inside the QR
-    const qrText =
+    manufacturerStore[productID] = {
+      companyName,
+      address,
+      productID,
+      productName,
+      brand,
+      mfgTimestamp: timestamp
+    };
+
+    const originText =
       `TrueTrace – Manufacturer Record\n` +
       `Company: ${companyName}\n` +
       `Address: ${address}\n` +
       `Product ID: ${productID}\n` +
       `Product Name: ${productName}\n` +
       `Brand: ${brand}\n` +
-      `Recorded At: ${timestamp}\n` +
-      `Status: Genuine (recorded on TrueTrace blockchain)`;
+      `Recorded At: ${timestamp}`;
 
-    // Hash for blockchain storage
-    const qrHash = CryptoJS.SHA256(qrText).toString();
+    const qrHash = CryptoJS.SHA256(originText).toString();
 
-    // For now reuse existing contract function with productID as numeric id.
-    // If productID is not numeric, map it yourself. Here we'll just use 0 and rely on hash.
     const tx = await contract.registerProduct(
-      0, // or Number(productID) if numeric
+      0,
       productName,
       companyName,
-      qrHash
+      qrHash,
+      { gasLimit: 3_000_000 }
     );
-
     await tx.wait();
 
     res.json({
       success: true,
-      txHash: tx.hash,
-      qrHash,
+      message:
+        "Manufacturer data stored. Use retailer portal to generate final QR.",
       timestamp,
-      qrText
+      txHash: tx.hash,
+      qrHash
     });
   } catch (err) {
     console.error(err);
@@ -104,38 +114,52 @@ app.post("/mfg/products", async (req, res) => {
   }
 });
 
-app.post("/retailer/batch", async (req, res) => {
+// Retailer final‑QR route
+app.post("/retailer/final-qr", async (req, res) => {
   try {
-    const { companyName, address, batchNo, brand } = req.body;
+    const { productID, outletName, address, batchNo, brand } = req.body;
 
-    const timestamp = new Date().toISOString();
+    const mfg = manufacturerStore[productID];
+    if (!mfg) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "No manufacturer data found for this Product ID. Please register at manufacturer portal first."
+      });
+    }
+
+    const retailTimestamp = new Date().toISOString();
 
     const qrText =
-      `TrueTrace – Retailer/Seller Record\n` +
-      `Outlet: ${companyName}\n` +
-      `Address: ${address}\n` +
-      `Batch No: ${batchNo}\n` +
-      `Brand: ${brand}\n` +
-      `Recorded At: ${timestamp}\n` +
-      `Status: Genuine batch (recorded on TrueTrace blockchain)`;
+      `TrueTrace – Complete Product & Batch Record ` +
+      `Manufacturer: ${mfg.companyName} ` +
+      `Mfg Address: ${mfg.address} ` +
+      `Product ID: ${mfg.productID} ` +
+      `Product Name: ${mfg.productName} ` +
+      `Brand: ${mfg.brand} ` +
+      `Manufactured At: ${mfg.mfgTimestamp} ` +
+      `Retailer/Outlet: ${outletName} ` +
+      `Retail Address: ${address} ` +
+      `Batch No: ${batchNo} ` +
+      `Retail Recorded At: ${retailTimestamp} ` +
+      `Status: Genuine (recorded on TrueTrace blockchain)`;
 
     const qrHash = CryptoJS.SHA256(qrText).toString();
 
-    // Reuse same contract; here we use 0 and store metadata in hash
     const tx = await contract.registerProduct(
-      0, // or some batch-based numeric id if you design it
-      batchNo,
-      companyName,
-      qrHash
+      0,
+      mfg.productName,
+      mfg.companyName,
+      qrHash,
+      { gasLimit: 3_000_000 }
     );
 
-    await tx.wait();
-
+    await tx.wait
     res.json({
       success: true,
       txHash: tx.hash,
       qrHash,
-      timestamp,
+      timestamp: retailTimestamp,
       qrText
     });
   } catch (err) {
@@ -146,9 +170,48 @@ app.post("/retailer/batch", async (req, res) => {
   }
 });
 
+// Verify QR text against on‑chain hash
+app.post("/verify", async (req, res) => {
+  try {
+    const { qrText } = req.body;
+    if (!qrText) {
+      return res
+        .status(400)
+        .json({ success: false, error: "qrText is required" });
+    }
 
+    const localHash = CryptoJS.SHA256(qrText).toString();
 
-// verify by id
+    const productId = 0;
+    const product = await contract.products(productId);
+    const onChainHash = product.qrHash;
+
+    if (!onChainHash || onChainHash === "0x") {
+      return res.status(400).json({
+        success: false,
+        error:
+          "No on-chain record found for this product id. Register and generate QR first."
+      });
+    }
+
+    const matches =
+      localHash.toLowerCase() === onChainHash.toLowerCase();
+
+    res.json({
+      success: true,
+      matches,
+      localHash,
+      onChainHash
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(400)
+      .json({ success: false, error: err.reason || err.message });
+  }
+});
+
+// Verify by numeric id (not used in QR flow)
 app.get("/products/:id/verify", async (req, res) => {
   try {
     const id = Number(req.params.id);

@@ -38,8 +38,17 @@ export default function LoginPage() {
     <div className="login-root">
       <div className="login-card">
         <div className="login-header">
-          {/* you can swap this text logo with your PDF logo rendered as image */}
-          <div className="logo-circle">TT</div>
+          <img
+            src={require("../assets/logo.png")}
+            alt="TrueTrace logo"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 14,
+              objectFit: "cover",
+              marginRight: 12
+            }}
+          />
           <div>
             <h1>TrueTrace</h1>
             <p>Secure access for supply chain partners</p>

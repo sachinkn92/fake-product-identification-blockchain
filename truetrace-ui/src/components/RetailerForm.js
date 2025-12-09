@@ -5,7 +5,8 @@ import "../App.css";
 
 export default function RetailerForm() {
   const [form, setForm] = useState({
-    companyName: "",
+    productID: "",
+    outletName: "",
     address: "",
     batchNo: "",
     brand: ""
@@ -19,35 +20,69 @@ export default function RetailerForm() {
   };
 
   const submitDetails = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult(null);
+  e.preventDefault();
+  setLoading(true);
+  setResult(null);
 
-    try {
-      const res = await axios.post("http://localhost:5000/retailer/batch", {
-        companyName: form.companyName,
-        address: form.address,
-        batchNo: form.batchNo,
-        brand: form.brand
-      });
-      setResult(res.data);
-    } catch (err) {
-      setResult({
-        success: false,
-        error: err.response?.data?.error || err.message
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const res = await axios.post("http://localhost:5000/retailer/final-qr", {
+      productID: form.productID,
+      outletName: form.outletName,
+      address: form.address,
+      batchNo: form.batchNo,
+      brand: form.brand
+    });
+    setResult(res.data);
+  } catch (err) {
+    setResult({
+      success: false,
+      error: err.response?.data?.error || err.message
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const qrText = result?.success ? result.qrText : null;
 
   return (
     <div className="app-root">
       <header className="app-header">
-        <div className="logo-mark">TT</div>
+        <a
+          href="/"
+          style={{
+            marginRight: "16px",
+            fontSize: "0.85rem",
+            color: "#9ca3af",
+            textDecoration: "none"
+          }}
+        >
+          Logout
+        </a>
+        <img
+            src={require("../assets/logo.png")}
+            alt="TrueTrace logo"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 14,
+              objectFit: "cover",
+              marginRight: 12
+            }}
+          />
         <div className="header-text">
+          <a
+            href="/verify"
+            style={{
+              marginLeft: "auto",
+              fontSize: "0.85rem",
+              color: "#a5b4fc",
+              textDecoration: "none"
+            }}
+          >
+            Verify QR
+          </a>
           <h1>TrueTrace – Retailer / Seller Console</h1>
           <p className="subtitle">
             Capture batch-level details and generate traceable QR codes.
@@ -66,14 +101,25 @@ export default function RetailerForm() {
 
           <form className="form" onSubmit={submitDetails}>
             <label>
-              Company / Outlet Name
+              Product ID
               <input
                 type="text"
-                name="companyName"
-                value={form.companyName}
+                name="productID"
+                value={form.productID}
                 onChange={handleChange}
                 required
               />
+            </label>
+
+            <label>
+              Outlet Name
+              <input
+                type="text"
+                name="outletName"
+                value={form.outletName}
+                onChange={handleChange}
+                required
+             />
             </label>
 
             <label>

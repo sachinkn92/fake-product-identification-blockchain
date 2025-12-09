@@ -5,6 +5,8 @@ import "./index.css";
 import LoginPage from "./pages/LoginPage";
 import ManufacturerPage from "./pages/ManufacturerPage";
 import RetailerPage from "./pages/RetailerPage";
+import VerifyPage from "./pages/VerifyPage";
+
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -14,6 +16,7 @@ root.render(
         <Route path="/" element={<LoginPage />} />
         <Route path="/manufacturer" element={<ManufacturerPage />} />
         <Route path="/retailer" element={<RetailerPage />} />
+        <Route path="/verify" element={<VerifyPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
