@@ -1,4 +1,6 @@
-<img width="827" height="633" alt="login page" src="https://github.com/user-attachments/assets/ea0d6b5b-2f3c-4a23-baad-7cb9c4a5ac37" />
+
+<img width="58" height="60" alt="logo-png" src="https://github.com/user-attachments/assets/08702567-0f1d-4417-bf98-ccf75554db94" />
+
 TrueTrace – Fake Product Identification Using Blockchain
 TrueTrace is a blockchain‑based system that links each product to a tamper‑proof digital record using QR codes and smart contracts. It helps manufacturers, retailers, and customers verify product authenticity and trace the product’s journey through the supply chain.​
 
